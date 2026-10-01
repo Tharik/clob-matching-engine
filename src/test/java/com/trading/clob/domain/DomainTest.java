@@ -53,15 +53,15 @@ class DomainTest {
     void accountProtectsBalanceSnapshotsAndValidatesUpdates() {
         Account account = new Account("account");
         Balance balance = new Balance(decimal("100"), BigDecimal.ZERO);
-        account.setBalance(BRL, balance);
+        account.creditAvailable(BRL, decimal("100"));
         var snapshot = account.balances();
         assertEquals("account", account.id());
         assertEquals(balance, snapshot.get(BRL));
         assertThrows(UnsupportedOperationException.class, () -> snapshot.clear());
-        account.setBalance(BRL, new Balance(decimal("50"), decimal("50")));
+        account.reserve(BRL, decimal("50"));
         assertEquals(balance, snapshot.get(BRL));
-        assertThrows(NullPointerException.class, () -> account.setBalance(null, balance));
-        assertThrows(NullPointerException.class, () -> account.setBalance(BTC, null));
+        assertThrows(NullPointerException.class, () -> account.creditAvailable(null, BigDecimal.ONE));
+        assertThrows(NullPointerException.class, () -> account.creditAvailable(BTC, null));
         assertEquals(1, account.balances().size());
         assertThrows(NullPointerException.class, () -> new Account(null));
     }
@@ -244,11 +244,13 @@ class DomainTest {
         assertEquals(0, missing.available().compareTo(BigDecimal.ZERO));
         assertEquals(0, missing.reserved().compareTo(BigDecimal.ZERO));
         assertTrue(account.balances().isEmpty());
-        Balance initial = new Balance(decimal("1.00"), BigDecimal.ZERO);
-        account.setBalance(BTC, initial);
+        account.creditAvailable(BTC, decimal("1.00"));
+        Balance initial = account.balanceOf(BTC);
+        assertEquals(new Balance(decimal("1.00"), BigDecimal.ZERO), initial);
         assertSame(initial, account.balanceOf(new Asset("BTC")));
-        Balance updated = new Balance(decimal("0.50"), decimal("0.50"));
-        account.setBalance(BTC, updated);
+        account.reserve(BTC, decimal("0.50"));
+        Balance updated = account.balanceOf(BTC);
+        assertEquals(new Balance(decimal("0.50"), decimal("0.50")), updated);
         assertSame(updated, account.balanceOf(BTC));
         assertThrows(NullPointerException.class, () -> account.balanceOf(null));
     }
