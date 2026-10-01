@@ -12,8 +12,16 @@ import java.util.Objects;
 public final class MatchingEngine {
     /** Executes at most one trade, or returns null if no price crosses. */
     public Trade matchNext(OrderBook book, Order incoming) {
-        validate(book, incoming);
-        return executeNext(book, incoming);
+        Order resting = nextMatchCandidate(book, incoming);
+        if (resting == null) return null;
+        boolean buy = incoming.side() == OrderSide.BUY;
+        BigDecimal quantity = incoming.remainingQuantity().min(resting.remainingQuantity());
+        Trade trade = new Trade(buy ? incoming.id() : resting.id(),
+                buy ? resting.id() : incoming.id(), book.instrument(), resting.limitPrice(), quantity);
+        incoming.applyFill(quantity);
+        resting.applyFill(quantity);
+        if (resting.status() == OrderStatus.FILLED) book.remove(resting.id());
+        return trade;
     }
 
     private static void validate(OrderBook book, Order incoming) {
@@ -31,7 +39,8 @@ public final class MatchingEngine {
         }
     }
 
-    private static Trade executeNext(OrderBook book, Order incoming) {
+    Order nextMatchCandidate(OrderBook book, Order incoming) {
+        validate(book, incoming);
         boolean buy = incoming.side() == OrderSide.BUY;
         Order resting = buy ? book.bestAsk() : book.bestBid();
         if (resting == null) return null;
@@ -42,12 +51,6 @@ public final class MatchingEngine {
                 || resting.remainingQuantity().signum() <= 0) {
             throw new IllegalStateException("Best resting order must be active");
         }
-        BigDecimal quantity = incoming.remainingQuantity().min(resting.remainingQuantity());
-        Trade trade = new Trade(buy ? incoming.id() : resting.id(),
-                buy ? resting.id() : incoming.id(), book.instrument(), resting.limitPrice(), quantity);
-        incoming.applyFill(quantity);
-        resting.applyFill(quantity);
-        if (resting.status() == OrderStatus.FILLED) book.remove(resting.id());
-        return trade;
+        return resting;
     }
 }
