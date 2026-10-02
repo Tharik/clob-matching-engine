@@ -1,0 +1,754 @@
+[
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.cancellationStress",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "queueSize" : "10"
+        },
+        "primaryMetric" : {
+            "score" : 0.03896847550424197,
+            "scoreError" : 3.2442282948804785E-4,
+            "scoreConfidence" : [
+                0.038644052674753925,
+                0.039292898333730016
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.03864195396709174,
+                "50.0" : 0.03898004819911456,
+                "90.0" : 0.03922751909129791,
+                "95.0" : 0.03922866506367222,
+                "99.0" : 0.03922866506367222,
+                "99.9" : 0.03922866506367222,
+                "99.99" : 0.03922866506367222,
+                "99.999" : 0.03922866506367222,
+                "99.9999" : 0.03922866506367222,
+                "100.0" : 0.03922866506367222
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.03907751490235375,
+                    0.03918807999660917,
+                    0.038913229709980984,
+                    0.03898595798049672,
+                    0.03922866506367222
+                ],
+                [
+                    0.038733667982144726,
+                    0.03864195396709174,
+                    0.038724341682408965,
+                    0.03921720533992907,
+                    0.038974138417732396
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.cancellationStress",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "queueSize" : "100"
+        },
+        "primaryMetric" : {
+            "score" : 0.05830736630647031,
+            "scoreError" : 4.6198141705604246E-4,
+            "scoreConfidence" : [
+                0.057845384889414264,
+                0.05876934772352635
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.05788627622566496,
+                "50.0" : 0.058264806066422474,
+                "90.0" : 0.05887646762728383,
+                "95.0" : 0.058908806999055964,
+                "99.0" : 0.058908806999055964,
+                "99.9" : 0.058908806999055964,
+                "99.99" : 0.058908806999055964,
+                "99.999" : 0.058908806999055964,
+                "99.9999" : 0.058908806999055964,
+                "100.0" : 0.058908806999055964
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.058908806999055964,
+                    0.05858541328133463,
+                    0.05826070393732227,
+                    0.058268908195522676,
+                    0.05823900308241838
+                ],
+                [
+                    0.05800492939196998,
+                    0.05830244863465337,
+                    0.05855777105504835,
+                    0.05788627622566496,
+                    0.05805940226171244
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.cancellationStress",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "queueSize" : "1000"
+        },
+        "primaryMetric" : {
+            "score" : 0.2465917797656004,
+            "scoreError" : 0.03532478214556311,
+            "scoreConfidence" : [
+                0.21126699762003728,
+                0.2819165619111635
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.21476686022819885,
+                "50.0" : 0.25859226459124474,
+                "90.0" : 0.26897040326570326,
+                "95.0" : 0.26917844360364046,
+                "99.0" : 0.26917844360364046,
+                "99.9" : 0.26917844360364046,
+                "99.99" : 0.26917844360364046,
+                "99.999" : 0.26917844360364046,
+                "99.9999" : 0.26917844360364046,
+                "100.0" : 0.26917844360364046
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.2670980402242683,
+                    0.22826528205128205,
+                    0.2209991805377721,
+                    0.21476686022819885,
+                    0.21617776649746193
+                ],
+                [
+                    0.26917844360364046,
+                    0.26697601636410123,
+                    0.26527167896678966,
+                    0.2594732457709409,
+                    0.25771128341154864
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.cancellationStress",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "queueSize" : "10000"
+        },
+        "primaryMetric" : {
+            "score" : 1.8183627543763727,
+            "scoreError" : 0.009621691548752934,
+            "scoreConfidence" : [
+                1.8087410628276197,
+                1.8279844459251258
+            ],
+            "scorePercentiles" : {
+                "0.0" : 1.811393734939759,
+                "50.0" : 1.8173939550331424,
+                "90.0" : 1.8293771519880138,
+                "95.0" : 1.829739426349052,
+                "99.0" : 1.829739426349052,
+                "99.9" : 1.829739426349052,
+                "99.99" : 1.829739426349052,
+                "99.999" : 1.829739426349052,
+                "99.9999" : 1.829739426349052,
+                "100.0" : 1.829739426349052
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    1.8122820019249277,
+                    1.811393734939759,
+                    1.829739426349052,
+                    1.817792270531401,
+                    1.8261166827386692
+                ],
+                [
+                    1.8138000965717045,
+                    1.8169956395348836,
+                    1.8238545101842871,
+                    1.819246475449684,
+                    1.8124067055393587
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.deepBookMatch",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "depth" : "100"
+        },
+        "primaryMetric" : {
+            "score" : 0.2044157618575014,
+            "scoreError" : 0.0038416334488348552,
+            "scoreConfidence" : [
+                0.20057412840866656,
+                0.20825739530633625
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.20142279659976678,
+                "50.0" : 0.20457654597091496,
+                "90.0" : 0.2070677950888373,
+                "95.0" : 0.20708035638523548,
+                "99.0" : 0.20708035638523548,
+                "99.9" : 0.20708035638523548,
+                "99.99" : 0.20708035638523548,
+                "99.999" : 0.20708035638523548,
+                "99.9999" : 0.20708035638523548,
+                "100.0" : 0.20708035638523548
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.20672045328995825,
+                    0.2069547434212537,
+                    0.2066484415864127,
+                    0.20708035638523548,
+                    0.2066449138776511
+                ],
+                [
+                    0.20142279659976678,
+                    0.20219145461654642,
+                    0.2019044552785699,
+                    0.20250817806417878,
+                    0.20208182545544068
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.deepBookMatch",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "depth" : "1000"
+        },
+        "primaryMetric" : {
+            "score" : 0.3697900442696659,
+            "scoreError" : 0.010359329381543913,
+            "scoreConfidence" : [
+                0.35943071488812195,
+                0.3801493736512098
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.358051755526658,
+                "50.0" : 0.3700868069067765,
+                "90.0" : 0.3787357673089299,
+                "95.0" : 0.37873820528473007,
+                "99.0" : 0.37873820528473007,
+                "99.9" : 0.37873820528473007,
+                "99.99" : 0.37873820528473007,
+                "99.999" : 0.37873820528473007,
+                "99.9999" : 0.37873820528473007,
+                "100.0" : 0.37873820528473007
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.36202455531453365,
+                    0.358051755526658,
+                    0.36463199651264167,
+                    0.3689274489261393,
+                    0.3687143855969236
+                ],
+                [
+                    0.37124616488741363,
+                    0.37146464375223776,
+                    0.3753874613686534,
+                    0.37873820528473007,
+                    0.37871382552672817
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.deepBookMatch",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "depth" : "10000"
+        },
+        "primaryMetric" : {
+            "score" : 0.7884006006001127,
+            "scoreError" : 0.2490722056979499,
+            "scoreConfidence" : [
+                0.5393283949021628,
+                1.0374728062980627
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.5367836774827925,
+                "50.0" : 0.7357912953926165,
+                "90.0" : 1.0082905018699708,
+                "95.0" : 1.0096760700389105,
+                "99.0" : 1.0096760700389105,
+                "99.9" : 1.0096760700389105,
+                "99.99" : 1.0096760700389105,
+                "99.999" : 1.0096760700389105,
+                "99.9999" : 1.0096760700389105,
+                "100.0" : 1.0096760700389105
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.9958203883495146,
+                    0.9316782945736434,
+                    0.7135358527131783,
+                    0.689611165523996,
+                    0.6302522167487685
+                ],
+                [
+                    1.0096760700389105,
+                    0.9239205426356589,
+                    0.7580467380720546,
+                    0.6946810598626104,
+                    0.5367836774827925
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.immediateMatch",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 0.14283401060993434,
+            "scoreError" : 0.0011988129300301144,
+            "scoreConfidence" : [
+                0.14163519767990423,
+                0.14403282353996444
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.14190186537232233,
+                "50.0" : 0.14287298883499228,
+                "90.0" : 0.14411864459458146,
+                "95.0" : 0.14416035530401797,
+                "99.0" : 0.14416035530401797,
+                "99.9" : 0.14416035530401797,
+                "99.99" : 0.14416035530401797,
+                "99.999" : 0.14416035530401797,
+                "99.9999" : 0.14416035530401797,
+                "100.0" : 0.14416035530401797
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.14416035530401797,
+                    0.1433568317054789,
+                    0.14320832934426767,
+                    0.14275679619502257,
+                    0.14298918147496198
+                ],
+                [
+                    0.1421456162809495,
+                    0.14214462898734084,
+                    0.1419332532253287,
+                    0.14190186537232233,
+                    0.14374324820965295
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.restingPlacement",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 0.04911286435213374,
+            "scoreError" : 0.003169830649962837,
+            "scoreConfidence" : [
+                0.0459430337021709,
+                0.05228269500209658
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.047972821743268654,
+                "50.0" : 0.04814270451144975,
+                "90.0" : 0.05313257637645556,
+                "95.0" : 0.05314357184921512,
+                "99.0" : 0.05314357184921512,
+                "99.9" : 0.05314357184921512,
+                "99.99" : 0.05314357184921512,
+                "99.999" : 0.05314357184921512,
+                "99.9999" : 0.05314357184921512,
+                "100.0" : 0.05314357184921512
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    0.047972821743268654,
+                    0.048131821550285774,
+                    0.04818441056298236,
+                    0.053033617121619483,
+                    0.04808634698210066
+                ],
+                [
+                    0.04808704533559277,
+                    0.04810693779850932,
+                    0.04815358747261374,
+                    0.05314357184921512,
+                    0.04822848310514954
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.sweep",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "orderCount" : "10"
+        },
+        "primaryMetric" : {
+            "score" : 0.9852281463541018,
+            "scoreError" : 0.01951993195783433,
+            "scoreConfidence" : [
+                0.9657082143962675,
+                1.0047480783119362
+            ],
+            "scorePercentiles" : {
+                "0.0" : 0.9707640469028564,
+                "50.0" : 0.9843605642102264,
+                "90.0" : 1.0061298346898242,
+                "95.0" : 1.0065188429382075,
+                "99.0" : 1.0065188429382075,
+                "99.9" : 1.0065188429382075,
+                "99.99" : 1.0065188429382075,
+                "99.999" : 1.0065188429382075,
+                "99.9999" : 1.0065188429382075,
+                "100.0" : 1.0065188429382075
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    1.0026287604543753,
+                    0.9932093852869096,
+                    1.0065188429382075,
+                    0.9891320017761273,
+                    0.9895154457874321
+                ],
+                [
+                    0.9795891266443256,
+                    0.9707640469028564,
+                    0.9734017588331582,
+                    0.9725280227640991,
+                    0.9749940721535257
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.sweep",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "orderCount" : "100"
+        },
+        "primaryMetric" : {
+            "score" : 11.480981096335496,
+            "scoreError" : 0.14133235199050073,
+            "scoreConfidence" : [
+                11.339648744344995,
+                11.622313448325997
+            ],
+            "scorePercentiles" : {
+                "0.0" : 11.316432139354088,
+                "50.0" : 11.466632319914986,
+                "90.0" : 11.642420569279482,
+                "95.0" : 11.646291399606985,
+                "99.0" : 11.646291399606985,
+                "99.9" : 11.646291399606985,
+                "99.99" : 11.646291399606985,
+                "99.999" : 11.646291399606985,
+                "99.9999" : 11.646291399606985,
+                "100.0" : 11.646291399606985
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    11.505578040042916,
+                    11.486392125468505,
+                    11.43776076728194,
+                    11.646291399606985,
+                    11.446560366527226
+                ],
+                [
+                    11.424053471142413,
+                    11.492287043237472,
+                    11.446872514361466,
+                    11.607583096331949,
+                    11.316432139354088
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "com.trading.clob.benchmark.TradingEngineBenchmark.sweep",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 2,
+        "jvm" : "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin/java",
+        "jvmArgs" : [
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.1+8-LTS",
+        "warmupIterations" : 3,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "orderCount" : "1000"
+        },
+        "primaryMetric" : {
+            "score" : 129.43165760641827,
+            "scoreError" : 1.1927487943575967,
+            "scoreConfidence" : [
+                128.23890881206069,
+                130.62440640077585
+            ],
+            "scorePercentiles" : {
+                "0.0" : 128.5050951204447,
+                "50.0" : 129.37180701130686,
+                "90.0" : 130.84460719098215,
+                "95.0" : 130.87312774409367,
+                "99.0" : 130.87312774409367,
+                "99.9" : 130.87312774409367,
+                "99.99" : 130.87312774409367,
+                "99.999" : 130.87312774409367,
+                "99.9999" : 130.87312774409367,
+                "100.0" : 130.87312774409367
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    128.62742301358583,
+                    128.5050951204447,
+                    128.88446564885496,
+                    128.89549659863945,
+                    130.58792221297836
+                ],
+                [
+                    129.3011474663909,
+                    129.49708150599918,
+                    130.87312774409367,
+                    129.44246655622283,
+                    129.70235019697284
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    }
+]
+
+
