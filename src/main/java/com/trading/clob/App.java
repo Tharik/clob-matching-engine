@@ -6,10 +6,13 @@ import com.trading.clob.domain.Balance;
 import com.trading.clob.domain.Instrument;
 import com.trading.clob.domain.OrderSide;
 import com.trading.clob.domain.Trade;
+import com.trading.clob.engine.BookOrderView;
+import com.trading.clob.engine.OrderBookSnapshot;
 import com.trading.clob.engine.PlacementResult;
 import com.trading.clob.engine.TradingEngine;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /** Deterministic demonstration using only the engine's public API. */
 public class App {
@@ -57,10 +60,12 @@ public class App {
         printResult("Charlie's BUY", resting);
         System.out.println("After placement:");
         printBalances(charlie, btc, brl);
+        printOrderBook(engine.orderBookSnapshot(instrument));
         engine.cancelOrder(charlie.id(), resting.orderId());
         System.out.println("Charlie cancels BUY order " + resting.orderId());
         System.out.println("After cancellation:");
         printBalances(charlie, btc, brl);
+        printOrderBook(engine.orderBookSnapshot(instrument));
     }
 
     private static BigDecimal decimal(String value) {
@@ -70,6 +75,25 @@ public class App {
     private static void printResult(String label, PlacementResult result) {
         System.out.println(label + ": order " + result.orderId() + ", status " + result.status()
                 + ", remaining quantity " + result.remainingQuantity().toPlainString() + " BTC");
+    }
+
+    private static void printOrderBook(OrderBookSnapshot snapshot) {
+        System.out.println("Order book:");
+        printBookSide("BIDS", snapshot.bids(), snapshot.instrument());
+        printBookSide("ASKS", snapshot.asks(), snapshot.instrument());
+    }
+
+    private static void printBookSide(String label, List<BookOrderView> orders, Instrument instrument) {
+        System.out.println("  " + label + ":");
+        if (orders.isEmpty()) {
+            System.out.println("    empty");
+        } else {
+            for (BookOrderView order : orders) {
+                System.out.println("    order " + order.orderId() + ": " + order.remainingQuantity().toPlainString()
+                        + " " + instrument.baseAsset().code() + " @ " + order.limitPrice().toPlainString()
+                        + " " + instrument.quoteAsset().code());
+            }
+        }
     }
 
     private static void printBalances(Account account, Asset... assets) {

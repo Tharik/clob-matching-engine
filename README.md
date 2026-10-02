@@ -14,17 +14,19 @@ The implementation favors correctness, deterministic execution, and code that is
 - Multiple instruments with independent books and shared account balances.
 - Engine-generated monotonic order IDs and sequence numbers, global within each engine instance.
 - Defensive reservation checks and immutable placement results.
+- Immutable order-book snapshots in execution-priority order.
 - Deterministic executable demo and comprehensive automated test coverage.
 
 ## Architecture
 
 | Component | Responsibility |
 | --- | --- |
-| `TradingEngine` | Registers accounts/instruments and orchestrates placement, reservation, individual executions, settlement, and cancellation. Retains all accepted orders. |
+| `TradingEngine` | Registers accounts/instruments and orchestrates placement, reservation, individual executions, settlement, and cancellation. Retains all accepted orders and exposes the public book snapshot query. |
 | `OrderBook` | Maintains one instrument's bids, asks, FIFO price levels, and active-order lookup. Structural removal does not cancel an order. |
 | `MatchingEngine` | Inspects the next crossing candidate internally and executes at most one trade through `matchNext()`. It does not settle balances or enforce self-trade policy. |
 | `Account` / `Balance` | Manage balances by asset through explicit credit, debit, reserve, release, and reserved-consumption operations. `Balance` is immutable. |
 | `Order` | Owns controlled fill/cancel transitions; identity, original quantity, limit price, and sequence remain unchanged. |
+| `OrderBookSnapshot` / `BookOrderView` | Immutable book and order views in execution-priority order, without account ownership or mutable order references. |
 | Value types | `Asset`, `Instrument`, `OrderSide`, `OrderStatus`, and immutable `Trade` describe the domain. `PlacementResult` captures placement status, remainder, and trades without exposing a mutable order. |
 
 The engine has no transport or infrastructure dependency. Accounts and instruments must be registered explicitly; duplicate registrations are rejected.
@@ -65,6 +67,28 @@ If the best crossing order belongs to the incoming account, matching stops. The 
 
 Unknown orders, wrong ownership, `FILLED` orders, and already `CANCELLED` orders are rejected explicitly. Accepted orders stay in the global registry after becoming `FILLED` or `CANCELLED`. Invalid submissions do not consume IDs/sequences or mutate balances/books; there is no persisted `REJECTED` status.
 
+## Optional Support Operations
+
+In addition to the mandatory CLOB operations, all four optional support operations suggested by the exercise are implemented:
+
+- Credit an asset: `Account.creditAvailable(asset, amount)`.
+- Debit an asset: `Account.debitAvailable(asset, amount)`.
+- Query account balance: `Account.balanceOf(asset)` for direct lookup, or `balances()` for a safe inspection snapshot.
+- Query current order book: `TradingEngine.orderBookSnapshot(instrument)`.
+
+The order-book query returns an immutable point-in-time snapshot ordered by execution priority. It exposes neither account ownership nor mutable `Order` objects. Snapshot creation traverses active book contents in O(number of active orders) on the query path.
+
+## Correctness Properties
+
+- Invalid or insufficient-balance submissions consume no order IDs/sequences and mutate neither books nor balances.
+- Reservations are established before accepted orders execute; backing for both orders' full current remainder is validated before matching.
+- Each successful match is settled before the next candidate is inspected.
+- Partial fills preserve time priority, and BUY price improvement is released immediately.
+- Cancellation releases only the active remainder reservation.
+- Self-trade prevention cancels the aggressor remainder rather than skipping a higher-priority self-order.
+- Active book snapshots exclude `FILLED`/`CANCELLED` orders and are immutable.
+- Integration tests verify asset conservation and multi-instrument isolation.
+
 ## Data Structures
 
 - **`TreeMap<BigDecimal, Deque<Order>>`:** price levels with reverse ordering for bids and natural ordering for asks. Numeric comparison groups equal prices without normalizing the order's stored price. Price-level operations and best-level access are O(log P), where P is the number of levels.
@@ -97,7 +121,7 @@ From the repository root:
 mvn clean test
 ```
 
-The test suite covers domain invariants, book ordering, matching, settlement, self-trade prevention, cancellation, reservation hardening, multiple instruments, asset conservation, and demo output.
+The test suite covers domain invariants, book ordering, matching, settlement, self-trade prevention, cancellation, reservation hardening, multiple instruments, asset conservation, snapshot semantics, and demo output.
 
 ## Run Demo
 
@@ -106,7 +130,7 @@ mvn -q -DskipTests package
 java -cp target/classes com.trading.clob.App
 ```
 
-The demo prints a resting SELL matched by an incoming BUY, the resulting execution and balances, then a separate BUY reservation followed by cancellation. It uses only the engine's public API and requires no input.
+The demo prints a resting SELL matched by an incoming BUY, the resulting execution and balances, then a separate BUY reservation followed by cancellation, with order-book snapshots before and after cancellation. It uses only the engine's public API and requires no input.
 
 ## Example Scenario
 
