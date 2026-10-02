@@ -15,7 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** In-memory placement orchestrator. All access, including registered accounts, must be serialized. */
+/**
+ * In-memory orchestrator for reservation, matching, settlement and cancellation.
+ *
+ * <p>All commands, queries and mutations of registered accounts must be serialized.
+ * Accepted orders reserve funds before execution; each match is settled before
+ * the next candidate is inspected. Callers must not alter reservations backing
+ * active orders through retained account references.</p>
+ */
 public final class TradingEngine {
     private final Map<String, Account> accounts = new HashMap<>();
     private final Map<Instrument, OrderBook> books = new HashMap<>();
@@ -24,6 +31,12 @@ public final class TradingEngine {
     private long nextOrderId = 1;
     private long nextSequence = 1;
 
+    /**
+     * Registers the supplied mutable account by ID, retaining the same instance.
+     *
+     * @throws NullPointerException if the account is null
+     * @throws IllegalArgumentException if its ID is already registered
+     */
     public void registerAccount(Account account) {
         Objects.requireNonNull(account, "account");
         if (accounts.putIfAbsent(account.id(), account) != null) {
@@ -31,12 +44,37 @@ public final class TradingEngine {
         }
     }
 
+    /**
+     * Registers an instrument and creates its independent, initially empty order book.
+     *
+     * @throws NullPointerException if the instrument is null
+     * @throws IllegalArgumentException if the instrument is already registered
+     */
     public void registerInstrument(Instrument instrument) {
         Objects.requireNonNull(instrument, "instrument");
         if (books.containsKey(instrument)) throw new IllegalArgumentException("Instrument is already registered");
         books.put(instrument, new OrderBook(instrument));
     }
 
+    /**
+     * Places a limit order with an engine-generated ID and sequence.
+     *
+     * <p>Validation precedes acceptance and reservation. Funds are reserved before
+     * execution; the order may match immediately, and only an active remainder
+     * rests in the book. A crossing self-order cancels the incoming remainder and
+     * releases its reservation without undoing previous settlements.</p>
+     *
+     * <p>A reservation failure at initial preflight has no side effects. If a
+     * later candidate fails reservation validation, prior settlements remain
+     * final and the incoming remainder is cancelled and released before rethrowing.</p>
+     *
+     * @return immutable snapshot of the placement status, remainder and executed trades
+     * @throws NullPointerException if a required argument is null
+     * @throws IllegalArgumentException if input is invalid, registration is missing,
+     *         or available funds are insufficient
+     * @throws IllegalStateException if a book or reservation invariant is violated
+     * @throws ArithmeticException if an ID or sequence counter is exhausted
+     */
     public PlacementResult placeOrder(String accountId, Instrument instrument, OrderSide side,
                                       BigDecimal limitPrice, BigDecimal quantity) {
         Objects.requireNonNull(accountId, "accountId");
@@ -99,6 +137,18 @@ public final class TradingEngine {
                 trades == null ? List.of() : trades);
     }
 
+    /**
+     * Cancels an owning account's active order and releases only its remaining reservation.
+     *
+     * <p>The order leaves the book but remains globally registered as cancelled.
+     * Remaining quantity is preserved. Previously completed trades and settlements remain unchanged.
+     * Invalid requests and detected cancellation invariant failures do not mutate state.</p>
+     *
+     * @throws NullPointerException if the account ID is null
+     * @throws IllegalArgumentException if the account or order is unknown, ownership
+     *         differs, the account ID is blank, or the order is already filled or cancelled
+     * @throws IllegalStateException if book membership or remaining reservation is inconsistent
+     */
     public void cancelOrder(String accountId, long orderId) {
         Objects.requireNonNull(accountId, "accountId");
         if (accountId.isBlank()) throw new IllegalArgumentException("Account ID must not be blank");
@@ -168,7 +218,17 @@ public final class TradingEngine {
         seller.creditAvailable(instrument.quoteAsset(), actualCost);
     }
 
-    /** Returns an immutable snapshot; access must be serialized with engine commands. */
+    /**
+     * Captures active public market state in execution-priority order.
+     *
+     * <p>The immutable point-in-time result contains no account ownership or mutable
+     * order references and does not change after subsequent engine commands.
+     * This query must be serialized with commands.</p>
+     *
+     * @return snapshot of the registered instrument's bids and asks
+     * @throws NullPointerException if the instrument is null
+     * @throws IllegalArgumentException if the instrument is not registered
+     */
     public OrderBookSnapshot orderBookSnapshot(Instrument instrument) {
         Objects.requireNonNull(instrument, "instrument");
         OrderBook book = books.get(instrument);

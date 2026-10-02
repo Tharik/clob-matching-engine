@@ -8,9 +8,26 @@ import com.trading.clob.domain.Trade;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-/** Pure matching over a book and incoming order; callers must serialize access. */
+/**
+ * Executes individual price-time matches at the resting order's limit price.
+ *
+ * <p>Callers must serialize access and orchestrate reservation validation,
+ * self-trade prevention and account settlement outside this component.</p>
+ */
 public final class MatchingEngine {
-    /** Executes at most one trade, or returns null if no price crosses. */
+    /**
+     * Executes at most one trade against the best crossing resting order.
+     *
+     * <p>Applies the smaller remaining quantity to both orders and removes a filled
+     * resting order. A partial resting fill keeps its priority. The incoming order
+     * must be active, belong to the book's instrument and have an ID absent from
+     * the book. Its remainder is not inserted, and account balances are not settled.</p>
+     *
+     * @return immutable execution, or null if the opposite side is empty or does not cross
+     * @throws NullPointerException if the book or incoming order is null
+     * @throws IllegalArgumentException if the incoming order violates these preconditions
+     * @throws IllegalStateException if a crossing resting order is inactive
+     */
     public Trade matchNext(OrderBook book, Order incoming) {
         Order resting = nextMatchCandidate(book, incoming);
         if (resting == null) return null;

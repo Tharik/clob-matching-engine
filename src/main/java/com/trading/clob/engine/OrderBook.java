@@ -17,7 +17,13 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
 
-/** Single-instrument book; serialized insertion order defines time priority within each price level. */
+/**
+ * Single-instrument book with best-price ordering and FIFO within numeric price levels.
+ *
+ * <p>Serialized insertion order defines time priority; partial fills do not change
+ * queue position. This component manages membership only, leaving settlement,
+ * reservation and cancellation lifecycle orchestration to the caller.</p>
+ */
 public final class OrderBook {
     private final Instrument instrument;
     private final NavigableMap<BigDecimal, Deque<Order>> bids = new TreeMap<>(Comparator.reverseOrder());

@@ -4,7 +4,11 @@ import com.trading.clob.domain.OrderStatus;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-/** Immutable public market view of an active order, without account ownership information. */
+/**
+ * Immutable public market state of an open or partially filled order at capture time.
+ * Contains its price and current remainder, without account ownership or a mutable
+ * order reference. Decimal representation is preserved.
+ */
 public record BookOrderView(long orderId, BigDecimal limitPrice,
                             BigDecimal remainingQuantity, OrderStatus status) {
     public BookOrderView {
