@@ -61,6 +61,11 @@ public final class TradingEngine {
         long followingId = Math.incrementExact(nextOrderId);
         long followingSequence = Math.incrementExact(nextSequence);
         Order incoming = new Order(nextOrderId, accountId, instrument, side, limitPrice, quantity, nextSequence);
+        // Preflight the first execution before acceptance so immediate invariant failures have no side effects.
+        Order firstCandidate = matching.nextMatchCandidate(book, incoming);
+        if (firstCandidate != null && !firstCandidate.accountId().equals(accountId)) {
+            validateReservations(incoming, firstCandidate, reservation);
+        }
         account.reserve(reservationAsset, reservation);
         nextOrderId = followingId;
         nextSequence = followingSequence;
@@ -71,11 +76,16 @@ public final class TradingEngine {
             Order resting = matching.nextMatchCandidate(book, incoming);
             if (resting == null) break;
             if (resting.accountId().equals(incoming.accountId())) {
-                BigDecimal remainderReservation = side == OrderSide.BUY
-                        ? limitPrice.multiply(incoming.remainingQuantity()) : incoming.remainingQuantity();
-                account.release(reservationAsset, remainderReservation);
+                releaseIncomingRemainder(incoming);
                 incoming.cancel();
                 break;
+            }
+            try {
+                validateReservations(incoming, resting, BigDecimal.ZERO);
+            } catch (IllegalStateException failure) {
+                releaseIncomingRemainder(incoming);
+                incoming.cancel();
+                throw failure;
             }
             Trade trade = matching.matchNext(book, incoming);
             settle(trade);
@@ -114,6 +124,32 @@ public final class TradingEngine {
         book.remove(orderId);
         account.release(asset, reservation);
         order.cancel();
+    }
+
+    private void releaseIncomingRemainder(Order incoming) {
+        boolean buy = incoming.side() == OrderSide.BUY;
+        Asset asset = buy ? incoming.instrument().quoteAsset() : incoming.instrument().baseAsset();
+        BigDecimal reservation = buy
+                ? incoming.limitPrice().multiply(incoming.remainingQuantity()) : incoming.remainingQuantity();
+        accounts.get(incoming.accountId()).release(asset, reservation);
+    }
+
+    /** Pending reservation is nonzero only during preflight, before incoming funds are reserved. */
+    private void validateReservations(Order incoming, Order resting, BigDecimal pendingReservation) {
+        Order buy = incoming.side() == OrderSide.BUY ? incoming : resting;
+        Order sell = incoming.side() == OrderSide.SELL ? incoming : resting;
+        BigDecimal buyReserved = accounts.get(buy.accountId()).balanceOf(buy.instrument().quoteAsset()).reserved();
+        BigDecimal sellReserved = accounts.get(sell.accountId()).balanceOf(sell.instrument().baseAsset()).reserved();
+        if (pendingReservation.signum() > 0) {
+            if (buy == incoming) buyReserved = buyReserved.add(pendingReservation);
+            else sellReserved = sellReserved.add(pendingReservation);
+        }
+        if (buyReserved.compareTo(buy.limitPrice().multiply(buy.remainingQuantity())) < 0) {
+            throw new IllegalStateException("Insufficient BUY reservation for full remaining quantity");
+        }
+        if (sellReserved.compareTo(sell.remainingQuantity()) < 0) {
+            throw new IllegalStateException("Insufficient SELL reservation for full remaining quantity");
+        }
     }
 
     private void settle(Trade trade) {

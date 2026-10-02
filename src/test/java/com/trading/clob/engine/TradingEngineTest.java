@@ -310,4 +310,141 @@ class TradingEngineTest {
         mutable.clear();
         assertEquals(1, copied.trades().size());
     }
+    @ParameterizedTest
+    @EnumSource(OrderSide.class)
+    void corruptedRestingReservationIsRejectedBeforeAcceptanceOrMatching(OrderSide restingSide) {
+        Account restingAccount = account("resting", "1", "500");
+        Account incomingAccount = account("incoming", "1", "500");
+        PlacementResult accepted = place("resting", restingSide, "500", "1");
+        Order resting = engine.orderById(accepted.orderId());
+        Asset asset = restingSide == OrderSide.BUY ? BRL : BTC;
+        restingAccount.consumeReserved(asset, restingSide == OrderSide.BUY ? d("1") : d("0.01"));
+        var restingBefore = restingAccount.balances();
+        var incomingBefore = incomingAccount.balances();
+        OrderSide incomingSide = restingSide == OrderSide.BUY ? OrderSide.SELL : OrderSide.BUY;
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> place("incoming", incomingSide, incomingSide == OrderSide.BUY ? "500" : "490", "1"));
+        assertTrue(failure.getMessage().contains(restingSide.name()));
+        assertEquals(restingBefore, restingAccount.balances());
+        assertEquals(incomingBefore, incomingAccount.balances());
+        assertEquals(OrderStatus.OPEN, resting.status());
+        assertEquals(d("1"), resting.remainingQuantity());
+        assertSame(resting, engine.bookFor(INSTRUMENT).orderById(resting.id()));
+        assertSame(resting, restingSide == OrderSide.BUY ? engine.bookFor(INSTRUMENT).bestBid()
+                : engine.bookFor(INSTRUMENT).bestAsk());
+        assertNull(engine.orderById(2));
+        assertNull(engine.bookFor(INSTRUMENT).orderById(2));
+        assertTrue(accepted.trades().isEmpty());
+        // Repair deliberately corrupted state: failed placement did not consume either counter.
+        restingAccount.creditAvailable(asset, restingSide == OrderSide.BUY ? d("1") : d("0.01"));
+        restingAccount.reserve(asset, restingSide == OrderSide.BUY ? d("1") : d("0.01"));
+        PlacementResult retry = place("incoming", incomingSide, "500", "1");
+        assertEquals(2, retry.orderId());
+        assertEquals(2, engine.orderById(retry.orderId()).sequence());
+        assertEquals(OrderStatus.FILLED, retry.status());
+        assertEquals(1, retry.trades().size());
+    }
+
+    @ParameterizedTest
+    @EnumSource(OrderSide.class)
+    void reservationForProspectiveFillAloneDoesNotBackFullRestingRemainder(OrderSide side) {
+        Account restingAccount = account("resting", "1", "500");
+        Account incomingAccount = account("incoming", "1", "500");
+        PlacementResult accepted = place("resting", side, "500", "1");
+        Order resting = engine.orderById(accepted.orderId());
+        restingAccount.consumeReserved(side == OrderSide.BUY ? BRL : BTC,
+                side == OrderSide.BUY ? d("300") : d("0.6"));
+        var restingBefore = restingAccount.balances();
+        var incomingBefore = incomingAccount.balances();
+        assertThrows(IllegalStateException.class,
+                () -> place("incoming", side == OrderSide.BUY ? OrderSide.SELL : OrderSide.BUY, "500.00", "0.4"));
+        assertEquals(restingBefore, restingAccount.balances());
+        assertEquals(incomingBefore, incomingAccount.balances());
+        assertEquals(OrderStatus.OPEN, resting.status());
+        assertEquals(d("1"), resting.remainingQuantity());
+        assertSame(resting, engine.bookFor(INSTRUMENT).orderById(resting.id()));
+        assertSame(resting, side == OrderSide.BUY ? engine.bookFor(INSTRUMENT).bestBid()
+                : engine.bookFor(INSTRUMENT).bestAsk());
+        assertNull(engine.orderById(2));
+        assertNull(engine.bookFor(INSTRUMENT).orderById(2));
+        assertTrue(accepted.trades().isEmpty());
+        // Repair backing: the same smaller incoming fill can now execute safely.
+        restingAccount.creditAvailable(side == OrderSide.BUY ? BRL : BTC,
+                side == OrderSide.BUY ? d("300") : d("0.6"));
+        restingAccount.reserve(side == OrderSide.BUY ? BRL : BTC,
+                side == OrderSide.BUY ? d("300") : d("0.6"));
+        PlacementResult result = place("incoming", side == OrderSide.BUY ? OrderSide.SELL : OrderSide.BUY, "500.00", "0.4");
+        assertEquals(2, result.orderId());
+        assertEquals(2, engine.orderById(2).sequence());
+        assertEquals(OrderStatus.FILLED, result.status());
+        assertEquals(1, result.trades().size());
+        assertEquals(OrderStatus.PARTIALLY_FILLED, resting.status());
+        balance(restingAccount, side == OrderSide.BUY ? BRL : BTC, "0", side == OrderSide.BUY ? "300" : "0.6");
+    }
+
+    @ParameterizedTest
+    @EnumSource(OrderSide.class)
+    void correctlyBackedPartiallyFilledRestingOrderContinuesMatching(OrderSide side) {
+        Account restingAccount = account("resting", "1", "500");
+        account("first", "1", "500");
+        account("second", "1", "500");
+        PlacementResult accepted = place("resting", side, "500", "1");
+        Order resting = engine.orderById(accepted.orderId());
+        OrderSide opposite = side == OrderSide.BUY ? OrderSide.SELL : OrderSide.BUY;
+        place("first", opposite, "500.00", "0.4");
+        assertEquals(OrderStatus.PARTIALLY_FILLED, resting.status());
+        balance(restingAccount, side == OrderSide.BUY ? BRL : BTC, "0", side == OrderSide.BUY ? "300" : "0.6");
+        PlacementResult next = place("second", opposite, "500.0", "0.2");
+        assertEquals(OrderStatus.FILLED, next.status());
+        assertEquals(1, next.trades().size());
+        assertEquals(0, d("0.2").compareTo(next.trades().getFirst().executedQuantity()));
+        assertEquals(OrderStatus.PARTIALLY_FILLED, resting.status());
+        assertEquals(0, d("0.4").compareTo(resting.remainingQuantity()));
+        balance(restingAccount, side == OrderSide.BUY ? BRL : BTC, "0", side == OrderSide.BUY ? "200" : "0.4");
+        assertSame(resting, engine.bookFor(INSTRUMENT).orderById(resting.id()));
+        assertEquals(1, resting.sequence());
+    }
+
+    @ParameterizedTest
+    @EnumSource(OrderSide.class)
+    void laterCorruptedCandidateCancelsIncomingRemainderAndKeepsEarlierSettlement(OrderSide restingSide) {
+        Account first = account("first", "1", "500");
+        Account corrupted = account("corrupted", "1", "500");
+        Account incomingAccount = account("incoming", "1", "500");
+        PlacementResult firstResult = place("first", restingSide, "500", "0.4");
+        PlacementResult corruptResult = place("corrupted", restingSide, "500", "0.6");
+        corrupted.consumeReserved(restingSide == OrderSide.BUY ? BRL : BTC,
+                restingSide == OrderSide.BUY ? d("1") : d("0.01"));
+        var corruptedBefore = corrupted.balances();
+        Order candidate = engine.orderById(corruptResult.orderId());
+        OrderSide incomingSide = restingSide == OrderSide.BUY ? OrderSide.SELL : OrderSide.BUY;
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> place("incoming", incomingSide, "500", "1"));
+        assertTrue(failure.getMessage().contains(restingSide.name()));
+        Order incoming = engine.orderById(3);
+        assertNotNull(incoming);
+        assertEquals(OrderStatus.CANCELLED, incoming.status());
+        assertEquals(0, d("0.6").compareTo(incoming.remainingQuantity()));
+        assertEquals(d("1"), incoming.originalQuantity());
+        assertEquals(3, incoming.sequence());
+        assertEquals(OrderStatus.OPEN, candidate.status());
+        assertEquals(d("0.6"), candidate.remainingQuantity());
+        assertSame(candidate, engine.bookFor(INSTRUMENT).orderById(candidate.id()));
+        assertNull(engine.bookFor(INSTRUMENT).orderById(incoming.id()));
+        assertNull(engine.bookFor(INSTRUMENT).orderById(firstResult.orderId()));
+        assertEquals(OrderStatus.FILLED, engine.orderById(firstResult.orderId()).status());
+        assertEquals(corruptedBefore, corrupted.balances());
+        if (incomingSide == OrderSide.BUY) {
+            balance(incomingAccount, BTC, "1.4", "0");
+            balance(incomingAccount, BRL, "300", "0");
+            balance(first, BTC, "0.6", "0");
+            balance(first, BRL, "700", "0");
+        } else {
+            balance(incomingAccount, BTC, "0.6", "0");
+            balance(incomingAccount, BRL, "700", "0");
+            balance(first, BTC, "1.4", "0");
+            balance(first, BRL, "300", "0");
+        }
+    }
+
 }
