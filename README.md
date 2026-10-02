@@ -15,7 +15,7 @@ The implementation favors correctness, deterministic execution, and code that is
 - Engine-generated monotonic order IDs and sequence numbers, global within each engine instance.
 - Defensive reservation checks and immutable placement results.
 - Immutable order-book snapshots in execution-priority order.
-- Deterministic executable demo and comprehensive automated test coverage.
+- Deterministic executable demo, interactive terminal console, and comprehensive automated test coverage.
 
 ## Architecture
 
@@ -30,6 +30,14 @@ The implementation favors correctness, deterministic execution, and code that is
 | Value types | `Asset`, `Instrument`, `OrderSide`, `OrderStatus`, and immutable `Trade` describe the domain. `PlacementResult` captures placement status, remainder, and trades without exposing a mutable order. |
 
 The engine has no transport or infrastructure dependency. Accounts and instruments must be registered explicitly; duplicate registrations are rejected.
+
+## Market Rules and Assumptions
+
+- Limit orders only, with best-price priority and FIFO at equal prices.
+- Trades execute at the resting order's price; partial fills are supported.
+- Active orders reserve funds for their remaining quantity; BUY price improvement is returned immediately.
+- Cancellation affects only the unfilled remainder.
+- Self-trades are prevented by cancelling the incoming remainder.
 
 ## Core Rules
 
@@ -63,7 +71,7 @@ If the best crossing order belongs to the incoming account, matching stops. The 
 
 ### Cancellation and lifecycle
 
-`cancelOrder(accountId, orderId)` accepts only an owning account's `OPEN` or `PARTIALLY_FILLED` order. It removes book membership, releases only the remaining reservation, and transitions to `CANCELLED`. Previous executions, original quantity, and remaining quantity are preserved.
+`cancelOrder(accountId, orderId)` accepts only an owning account's `OPEN` or `PARTIALLY_FILLED` order. It removes book membership, releases only the remaining reservation, and transitions to `CANCELLED`. Previously completed trades and settlements remain unchanged; original and remaining quantities are preserved.
 
 Unknown orders, wrong ownership, `FILLED` orders, and already `CANCELLED` orders are rejected explicitly. Accepted orders stay in the global registry after becoming `FILLED` or `CANCELLED`. Invalid submissions do not consume IDs/sequences or mutate balances/books; there is no persisted `REJECTED` status.
 
@@ -121,9 +129,11 @@ From the repository root:
 mvn clean test
 ```
 
-The test suite covers domain invariants, book ordering, matching, settlement, self-trade prevention, cancellation, reservation hardening, multiple instruments, asset conservation, snapshot semantics, and demo output.
+The test suite covers domain invariants, book ordering, matching, settlement, self-trade prevention, cancellation, reservation hardening, multiple instruments, asset conservation, snapshot semantics, demo output, and scripted console interaction.
 
 ## Run Demo
+
+Two entry points are available: `App.java` for a deterministic demonstration and `ConsoleApp.java` for interactive manual operation.
 
 ```sh
 mvn -q -DskipTests package
@@ -131,6 +141,19 @@ java -cp target/classes com.trading.clob.App
 ```
 
 The demo prints a resting SELL matched by an incoming BUY, the resulting execution and balances, then a separate BUY reservation followed by cancellation, with order-book snapshots before and after cancellation. It uses only the engine's public API and requires no input.
+
+## Interactive Console
+
+`ConsoleApp` is a standard-library terminal adapter over the existing engine, initialized with the BTC/BRL market.
+
+```sh
+mvn -q -DskipTests package
+java -cp target/classes com.trading.clob.ConsoleApp
+```
+
+The menu supports creating accounts, crediting/debiting BTC or BRL available balance, querying balances, placing limit orders, cancelling orders, and viewing the BTC/BRL order book. Normal invalid input prints an error and returns to the menu; choose `0` to exit.
+
+The console handles input and presentation only. Matching, settlement, reservation, and cancellation rules remain in `TradingEngine` and the domain/engine classes.
 
 ## Example Scenario
 
@@ -142,12 +165,14 @@ The trade executes at **490000 BRL**, Bob's resting price. Alice receives **1 BT
 
 ```text
 src/main/java/com/trading/clob/
-├── App.java                 Executable demo
+├── App.java                 Deterministic demonstration
+├── ConsoleApp.java          Interactive manual operation
 ├── domain/                  Assets, instruments, accounts, balances, orders, trades
 └── engine/                  OrderBook, MatchingEngine, TradingEngine, PlacementResult
 
 src/test/java/com/trading/clob/
 ├── AppTest.java             Demo output check
+├── ConsoleAppTest.java      Scripted console interaction tests
 ├── domain/                  Domain and account-operation tests
 └── engine/                  Book, matching, placement, cancellation, integration tests
 ```
