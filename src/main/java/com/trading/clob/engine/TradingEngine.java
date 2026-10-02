@@ -89,6 +89,33 @@ public final class TradingEngine {
                 trades == null ? List.of() : trades);
     }
 
+    public void cancelOrder(String accountId, long orderId) {
+        Objects.requireNonNull(accountId, "accountId");
+        if (accountId.isBlank()) throw new IllegalArgumentException("Account ID must not be blank");
+        Account account = accounts.get(accountId);
+        if (account == null) throw new IllegalArgumentException("Unknown account");
+        Order order = orders.get(orderId);
+        if (order == null) throw new IllegalArgumentException("Unknown order");
+        if (!order.accountId().equals(accountId)) {
+            throw new IllegalArgumentException("Order belongs to another account");
+        }
+        if (order.status() == OrderStatus.FILLED) throw new IllegalArgumentException("Order is FILLED");
+        if (order.status() == OrderStatus.CANCELLED) throw new IllegalArgumentException("Order is already CANCELLED");
+        OrderBook book = books.get(order.instrument());
+        if (book == null || book.orderById(orderId) != order) {
+            throw new IllegalStateException("Active order is missing from its OrderBook");
+        }
+        Asset asset = order.side() == OrderSide.BUY ? order.instrument().quoteAsset() : order.instrument().baseAsset();
+        BigDecimal reservation = order.side() == OrderSide.BUY
+                ? order.limitPrice().multiply(order.remainingQuantity()) : order.remainingQuantity();
+        if (reservation.signum() <= 0 || account.balanceOf(asset).reserved().compareTo(reservation) < 0) {
+            throw new IllegalStateException("Active order has insufficient remaining reservation");
+        }
+        book.remove(orderId);
+        account.release(asset, reservation);
+        order.cancel();
+    }
+
     private void settle(Trade trade) {
         Order buy = orders.get(trade.buyOrderId());
         Order sell = orders.get(trade.sellOrderId());
