@@ -7,9 +7,11 @@ import com.trading.clob.domain.OrderStatus;
 
 import java.math.BigDecimal;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Objects;
@@ -71,6 +73,22 @@ public final class OrderBook {
         level.remove(order);
         if (level.isEmpty()) levels.remove(order.limitPrice());
         return order;
+    }
+
+    OrderBookSnapshot snapshot() {
+        return new OrderBookSnapshot(instrument, snapshotSide(bids), snapshotSide(asks));
+    }
+
+    private static List<BookOrderView> snapshotSide(NavigableMap<BigDecimal, Deque<Order>> levels) {
+        List<BookOrderView> views = new ArrayList<>();
+        for (Deque<Order> level : levels.values()) {
+            for (Order order : level) {
+                if (order.status() == OrderStatus.OPEN || order.status() == OrderStatus.PARTIALLY_FILLED) {
+                    views.add(new BookOrderView(order.id(), order.limitPrice(), order.remainingQuantity(), order.status()));
+                }
+            }
+        }
+        return views;
     }
 
     private NavigableMap<BigDecimal, Deque<Order>> side(OrderSide side) {

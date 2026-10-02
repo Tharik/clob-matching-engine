@@ -168,6 +168,14 @@ public final class TradingEngine {
         seller.creditAvailable(instrument.quoteAsset(), actualCost);
     }
 
+    /** Returns an immutable snapshot; access must be serialized with engine commands. */
+    public OrderBookSnapshot orderBookSnapshot(Instrument instrument) {
+        Objects.requireNonNull(instrument, "instrument");
+        OrderBook book = books.get(instrument);
+        if (book == null) throw new IllegalArgumentException("Unregistered instrument");
+        return book.snapshot();
+    }
+
     // Internal inspection for engine code; mutable orders/books are not part of the public placement API.
     Order orderById(long id) {
         return orders.get(id);
